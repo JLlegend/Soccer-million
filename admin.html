@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#071329" />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="icon" href="icons/icon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="styles.css" />
+    <title>Parent · Soccer Million Challenge</title>
+  </head>
+  <body class="admin-page theme-0">
+    <main class="admin-shell glass-card">
+      <a class="back-link" href="index.html">← Challenge</a>
+      <div id="pinPanel">
+        <p class="eyebrow">PARENT AREA</p>
+        <h1>Enter your PIN</h1>
+        <p class="muted">Only parents can add today’s shots.</p>
+        <form id="pinForm"><input id="pinInput" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="12" autocomplete="current-password" placeholder="PIN" required /><button>Unlock</button></form>
+        <p id="pinMessage" class="form-message" role="alert"></p>
+      </div>
+      <div id="editorPanel" hidden>
+        <p class="eyebrow">PARENT AREA</p>
+        <h1>Today's shots</h1>
+        <p class="today-date" id="todayDate"></p>
+        <form id="shotsForm"><input id="shotsInput" type="number" min="0" max="100000" step="1" inputmode="numeric" placeholder="327" required /><button id="saveButton">Save</button></form>
+        <p class="muted">Current total: <strong id="adminTotal">0</strong> shots</p>
+        <p id="saveMessage" class="form-message" role="status"></p>
+        <button id="lockButton" class="text-button">Lock parent area</button>
+      </div>
+    </main>
+    <script type="module" src="admin.js"></script>
+  </body>
+</html>
