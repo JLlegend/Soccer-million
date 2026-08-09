@@ -2,11 +2,6 @@ import { subscribeChallenge, useFirebase } from "./data.js";
 
 const levels = ["Beginner", "Rookie", "Academy", "Striker", "Playmaker", "Finisher", "Sharpshooter", "Elite", "Champion", "Master", "Legend"];
 const levelSize = 10000;
-const achievements = [
-  { goal: 100000, icon: "🏅", name: "MASTER" },
-  { goal: 200000, icon: "👑", name: "LEGEND" },
-  { goal: 1000000, icon: "🏆", name: "MILLION CLUB" }
-];
 const format = new Intl.NumberFormat("en-US");
 
 function streak(dailyShots = {}) {
@@ -27,7 +22,14 @@ function render(data) {
   document.querySelector("#progressBar").style.width = `${(total % levelSize) / levelSize * 100}%`;
   const days = streak(data.dailyShots);
   document.querySelector("#streakDays").textContent = `${days} Day${days === 1 ? "" : "s"} Streak`;
-  document.querySelector("#badges").innerHTML = achievements.map(a => `<article class="badge ${total >= a.goal ? "unlocked" : "locked"}"><span>${a.icon}</span><strong>${a.name}</strong><small>${format.format(a.goal)} shots</small></article>`).join("");
+  const upcoming = levels.slice(levelIndex + 1, levelIndex + 5).map((name, offset) => ({
+    name,
+    level: levelIndex + offset + 2,
+    goal: (levelIndex + offset + 1) * levelSize,
+    remaining: (levelIndex + offset + 1) * levelSize - total
+  }));
+  document.querySelector("#achievementsHeading").textContent = "NEXT 4 LEVELS";
+  document.querySelector("#badges").innerHTML = upcoming.map(next => `<article class="badge next-badge"><span>⚽</span><strong>LEVEL ${next.level}</strong><b>${next.name}</b><small>${format.format(next.goal)} shots</small><em>${format.format(next.remaining)} to go</em></article>`).join("");
 }
 
 subscribeChallenge(render, () => document.querySelector("#connectionStatus").textContent = "Could not connect. Check Firebase setup.");
