@@ -1,4 +1,4 @@
-const CACHE = "soccer-million-v8";
+const CACHE = "soccer-million-v9";
 
 const ASSETS = [
   "./",
