@@ -43,6 +43,15 @@ export async function saveTodayShots(shots, dateKey) {
   return next;
 }
 
+export async function setTotalShots(total) {
+  const current = await getChallenge();
+  const next = { ...current, totalShots: total, updatedAt: new Date().toISOString() };
+  if (!useFirebase) { saveDemo(next); return next; }
+  const { doc, setDoc } = await import("https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js");
+  await setDoc(doc(db, "challenge", "main"), next);
+  return next;
+}
+
 export async function unlockParent(pin) {
   if (!useFirebase) return true;
   if (!parentEmail || parentEmail === "parent@example.com") throw new Error("Add parentEmail to firebase-config.js first.");

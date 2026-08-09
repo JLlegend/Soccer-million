@@ -26,6 +26,12 @@
         <form id="shotsForm"><input id="shotsInput" type="number" min="0" max="100000" step="1" inputmode="numeric" placeholder="327" required /><button id="saveButton">Save</button></form>
         <p class="muted">Current total: <strong id="adminTotal">0</strong> shots</p>
         <p id="saveMessage" class="form-message" role="status"></p>
+        <section class="total-correction" aria-labelledby="correctionTitle">
+          <p id="correctionTitle" class="card-label">TOTAL CORRECTION</p>
+          <p class="muted">Use this only to correct the all-time total.</p>
+          <form id="totalForm"><input id="totalInput" type="number" min="0" max="1000000" step="1" inputmode="numeric" placeholder="309" required /><button id="totalButton">Set total</button></form>
+          <p id="totalMessage" class="form-message" role="status"></p>
+        </section>
         <button id="lockButton" class="text-button">Lock parent area</button>
       </div>
     </main>
