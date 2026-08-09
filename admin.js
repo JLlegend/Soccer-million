@@ -13,7 +13,16 @@ $("#pinForm").addEventListener("submit", async event => {
     if (useFirebase) await unlockParent($("#pinInput").value);
     else if ($("#pinInput").value !== adminPin) throw new Error("incorrect");
     sessionStorage.setItem("soccer-parent-unlocked", "yes"); showEditor();
-  } catch { message.textContent = "That PIN isn't correct, or parent authentication is not configured."; }
+  } catch (error) {
+    const explanations = {
+      "auth/invalid-credential": "This PIN does not match the parent Firebase account.",
+      "auth/invalid-login-credentials": "This PIN does not match the parent Firebase account.",
+      "auth/user-not-found": "The parent email in firebase-config.js is not registered in Firebase Authentication.",
+      "auth/operation-not-allowed": "Enable Email/Password in Firebase Authentication → Sign-in method.",
+      "auth/too-many-requests": "Too many attempts. Please wait a moment and try again."
+    };
+    message.textContent = explanations[error?.code] || "Parent login could not be verified. Check Firebase Authentication settings.";
+  }
 });
 $("#lockButton").onclick = async () => { await lockParent(); sessionStorage.removeItem("soccer-parent-unlocked"); location.reload(); };
 $("#shotsForm").addEventListener("submit", async event => {
