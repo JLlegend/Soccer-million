@@ -1,7 +1,18 @@
 import { subscribeChallenge, useFirebase } from "./data.js";
 
-const levels = ["Beginner", "Rookie", "Academy", "Striker", "Playmaker", "Finisher", "Sharpshooter", "Elite", "Champion", "Master", "Legend"];
-const levelSize = 10000;
+const levels = [
+  { name: "Beginner", target: 10000, image: "beginner" },
+  { name: "Rookie", target: 20000, image: "rookie" },
+  { name: "Academy", target: 30000, image: "academy" },
+  { name: "Striker", target: 40000, image: "striker" },
+  { name: "Playmaker", target: 50000, image: "playmaker" },
+  { name: "Finisher", target: 70000, image: "finisher" },
+  { name: "Sharpshooter", target: 100000, image: "sharpshooter" },
+  { name: "Elite", target: 150000, image: "elite" },
+  { name: "Champion", target: 200000, image: "champion" },
+  { name: "Master", target: 500000, image: "master" },
+  { name: "Legend", target: 1000000, image: "legend" }
+];
 const format = new Intl.NumberFormat("en-US");
 
 function streak(dailyShots = {}) {
@@ -12,21 +23,27 @@ function streak(dailyShots = {}) {
 
 function render(data) {
   const total = Number(data.totalShots || 0);
-  const levelIndex = Math.min(levels.length - 1, Math.floor(total / levelSize));
-  const nextGoal = (levelIndex + 1) * levelSize;
+  const foundLevel = levels.findIndex(level => total < level.target);
+  const levelIndex = foundLevel === -1 ? levels.length - 1 : foundLevel;
+  const level = levels[levelIndex];
+  const priorTarget = levelIndex === 0 ? 0 : levels[levelIndex - 1].target;
+  const remaining = Math.max(0, level.target - total);
+  const nextLevel = levels[levelIndex + 1];
   document.body.className = `theme-${Math.min(5, Math.floor(total / 200000))}`;
+  document.body.style.setProperty("--pitch-image", `url("assets/levels/${level.image}.webp")`);
   document.querySelector("#totalShots").textContent = format.format(total);
   document.querySelector("#levelNumber").textContent = levelIndex + 1;
-  document.querySelector("#levelName").textContent = levels[levelIndex];
-  document.querySelector("#shotsRemaining").textContent = format.format(Math.max(0, nextGoal - total));
-  document.querySelector("#progressBar").style.width = `${(total % levelSize) / levelSize * 100}%`;
+  document.querySelector("#levelName").textContent = level.name;
+  document.querySelector("#nextLevelName").textContent = nextLevel?.name || "MILLION CLUB";
+  document.querySelector("#shotsRemaining").textContent = format.format(remaining);
+  document.querySelector("#progressBar").style.width = `${Math.min(100, Math.max(0, (total - priorTarget) / (level.target - priorTarget) * 100))}%`;
   const days = streak(data.dailyShots);
   document.querySelector("#streakDays").textContent = `${days} Day${days === 1 ? "" : "s"} Streak`;
-  const upcoming = levels.slice(levelIndex + 1, levelIndex + 5).map((name, offset) => ({
-    name,
+  const upcoming = levels.slice(levelIndex + 1, levelIndex + 5).map((next, offset) => ({
+    name: next.name,
     level: levelIndex + offset + 2,
-    goal: (levelIndex + offset + 1) * levelSize,
-    remaining: (levelIndex + offset + 1) * levelSize - total
+    goal: next.target,
+    remaining: next.target - total
   }));
   document.querySelector("#achievementsHeading").textContent = "NEXT 4 LEVELS";
   document.querySelector("#badges").innerHTML = upcoming.map(next => `<article class="badge next-badge"><span>⚽</span><strong>LEVEL ${next.level}</strong><b>${next.name}</b><small>${format.format(next.goal)} shots</small><em>${format.format(next.remaining)} to go</em></article>`).join("");
