@@ -1,7 +1,14 @@
 import { adminPin } from "./firebase-config.js";
 import { getChallenge, saveTodayShots, setTotalShots, unlockParent, lockParent, useFirebase } from "./data.js";
 
-const dateKey = new Date().toISOString().slice(0, 10);
+function getLocalDateKey(date = new Date()) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+const dateKey = getLocalDateKey();
 const format = new Intl.NumberFormat("en-US");
 const $ = s => document.querySelector(s);
 $("#todayDate").textContent = new Intl.DateTimeFormat("en-US", { weekday: "long", month: "long", day: "numeric" }).format(new Date());
