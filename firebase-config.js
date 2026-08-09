@@ -11,6 +11,6 @@ export const firebaseConfig = {
 
 export const adminPin = "973102";
 // This email is not secret. Its password is the numeric PIN entered in admin.html.
-export const parentEmail = "57jordan@naver.com";
+export const parentEmail = "leejaeock@gmail.com";
 // Set this once to the number already completed before using the app.
 export const startingTotal = 309;
