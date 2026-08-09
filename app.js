@@ -1,15 +1,15 @@
 import { subscribeChallenge, useFirebase } from "./data.js";
 
 const levels = [
-  { name: "Beginner", target: 10000, image: "beginner" },
-  { name: "Rookie", target: 20000, image: "rookie" },
-  { name: "Academy", target: 30000, image: "academy" },
-  { name: "Striker", target: 40000, image: "striker" },
-  { name: "Playmaker", target: 50000, image: "playmaker" },
+  { name: "Beginner", target: 100, image: "beginner" },
+  { name: "Rookie", target: 5000, image: "rookie" },
+  { name: "Academy", target: 15000, image: "academy" },
+  { name: "Playmaker", target: 25000, image: "striker" },
+  { name: "Striker", target: 40000, image: "playmaker" },
   { name: "Finisher", target: 70000, image: "finisher" },
-  { name: "Sharpshooter", target: 100000, image: "sharpshooter" },
-  { name: "Elite", target: 150000, image: "elite" },
-  { name: "Champion", target: 200000, image: "champion" },
+  { name: "Sharpshooter", target: 120000, image: "sharpshooter" },
+  { name: "Elite", target: 200000, image: "elite" },
+  { name: "Champion", target: 300000, image: "champion" },
   { name: "Master", target: 500000, image: "master" },
   { name: "Legend", target: 1000000, image: "legend" }
 ];
