@@ -1,17 +1,17 @@
 import { submitGoal, submitShots, subscribeChallenge, subscribeLatestGoal, useFirebase } from "./data.js";
 
 const levels = [
-  { name: "Beginner", target: 5000, image: "beginner" },
-  { name: "Rookie", target: 15000, image: "rookie" },
-  { name: "Academy", target: 25000, image: "academy" },
-  { name: "Playmaker", target: 40000, image: "playmaker" },
-  { name: "Striker", target: 60000, image: "striker" },
-  { name: "Finisher", target: 90000, image: "finisher" },
-  { name: "Sharpshooter", target: 130000, image: "sharpshooter" },
-  { name: "Elite", target: 200000, image: "elite" },
-  { name: "Champion", target: 300000, image: "champion" },
-  { name: "Master", target: 500000, image: "master" },
-  { name: "Legend", target: 1000000, image: "legend" }
+  { name: "Beginner", start: 0, target: 5000, image: "beginner" },
+  { name: "Rookie", start: 5000, target: 15000, image: "rookie" },
+  { name: "Academy", start: 15000, target: 25000, image: "academy" },
+  { name: "Playmaker", start: 25000, target: 40000, image: "playmaker" },
+  { name: "Striker", start: 40000, target: 60000, image: "striker" },
+  { name: "Finisher", start: 60000, target: 90000, image: "finisher" },
+  { name: "Sharpshooter", start: 90000, target: 130000, image: "sharpshooter" },
+  { name: "Elite", start: 130000, target: 200000, image: "elite" },
+  { name: "Champion", start: 200000, target: 300000, image: "champion" },
+  { name: "Master", start: 300000, target: 500000, image: "master" },
+  { name: "Legend", start: 500000, target: 1000000, image: "legend" }
 ];
 const format = new Intl.NumberFormat("en-US");
 
@@ -23,10 +23,9 @@ function streak(dailyShots = {}) {
 
 function render(data) {
   const total = Number(data.totalShots || 0);
-  const foundLevel = levels.findIndex(level => total < level.target);
-  const levelIndex = foundLevel === -1 ? levels.length - 1 : foundLevel;
+  const levelIndex = Math.max(0, levels.reduce((current, level, index) => total >= level.start ? index : current, 0));
   const level = levels[levelIndex];
-  const priorTarget = levelIndex === 0 ? 0 : levels[levelIndex - 1].target;
+  const priorTarget = level.start;
   const remaining = Math.max(0, level.target - total);
   const nextLevel = levels[levelIndex + 1];
   document.body.className = `theme-${Math.min(5, Math.floor(total / 200000))}`;
@@ -48,8 +47,8 @@ function render(data) {
   const upcoming = levels.slice(levelIndex + 1, levelIndex + 5).map((next, offset) => ({
     name: next.name,
     level: levelIndex + offset + 2,
-    goal: next.target,
-    remaining: next.target - total
+    goal: next.start,
+    remaining: next.start - total
   }));
   document.querySelector("#achievementsHeading").textContent = "NEXT 4 LEVELS";
   document.querySelector("#badges").innerHTML = upcoming.map(next => `<article class="badge next-badge"><span>⚽</span><strong>LEVEL ${next.level}</strong><b>${next.name}</b><small>${format.format(next.goal)} shots</small><em>${format.format(next.remaining)} to go</em></article>`).join("");
@@ -67,7 +66,7 @@ document.querySelector("#submissionForm").addEventListener("submit", async event
   if (!Number.isInteger(value) || value < 1) return message.textContent = "Enter a whole number of shots.";
   button.disabled = true; message.textContent = "Sending…";
   try { await submitShots(value); document.querySelector("#submissionInput").value = ""; message.textContent = "Sent! Your parent can approve it now."; }
-  catch { message.textContent = "Could not send. Please try again."; }
+  catch (error) { message.textContent = error?.code === "permission-denied" ? "Submission is blocked until the Firebase Rules are updated." : "Could not send. Please try again."; }
   button.disabled = false;
 });
 document.querySelector("#goalForm").addEventListener("submit", async event => {
