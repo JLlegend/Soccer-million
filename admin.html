@@ -8,6 +8,7 @@
     <link rel="icon" href="icons/icon.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="styles.css" />
     <link rel="stylesheet" href="features.css" />
+    <link rel="stylesheet" href="rewards.css" />
     <title>Parent · Soccer Million Challenge</title>
   </head>
   <body class="admin-page theme-0">
@@ -34,6 +35,24 @@
           <p class="muted">Write the reward message your child sees after a 10-day streak.</p>
           <form id="giftForm"><textarea id="giftInput" maxlength="180" placeholder="You earned a new soccer ball!"></textarea><button id="giftButton">Save gift</button></form>
           <p id="giftMessage" class="form-message" role="status"></p>
+        </section>
+        <section class="level-gift-editor" aria-labelledby="levelGiftEditorTitle">
+          <p id="levelGiftEditorTitle" class="card-label">LEVEL REWARD BOXES</p>
+          <p class="muted">Write the gift your child will see when each level is reached.</p>
+          <form id="levelGiftForm" class="level-gift-form">
+            <label>Rookie <input data-level-gift="Rookie" maxlength="100" placeholder="New soccer socks" /></label>
+            <label>Academy <input data-level-gift="Academy" maxlength="100" placeholder="Choose a soccer snack" /></label>
+            <label>Playmaker <input data-level-gift="Playmaker" maxlength="100" placeholder="Pick a family movie" /></label>
+            <label>Striker <input data-level-gift="Striker" maxlength="100" placeholder="New training cones" /></label>
+            <label>Finisher <input data-level-gift="Finisher" maxlength="100" placeholder="Special soccer treat" /></label>
+            <label>Sharpshooter <input data-level-gift="Sharpshooter" maxlength="100" placeholder="New soccer ball" /></label>
+            <label>Elite <input data-level-gift="Elite" maxlength="100" placeholder="Choose dinner" /></label>
+            <label>Champion <input data-level-gift="Champion" maxlength="100" placeholder="Soccer jersey" /></label>
+            <label>Master <input data-level-gift="Master" maxlength="100" placeholder="Big surprise" /></label>
+            <label>Legend <input data-level-gift="Legend" maxlength="100" placeholder="Legendary reward" /></label>
+            <button id="levelGiftButton">Save level gifts</button>
+          </form>
+          <p id="levelGiftMessage" class="form-message" role="status"></p>
         </section>
         <details class="manual-entry">
           <summary>Parent manual entry / correction</summary>

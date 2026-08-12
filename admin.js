@@ -1,5 +1,5 @@
 import { adminPin } from "./firebase-config.js";
-import { approveSubmission, getChallenge, saveStreakGift, saveTodayShots, setTotalShots, subscribePendingSubmissions, unlockParent, lockParent, useFirebase } from "./data.js";
+import { approveSubmission, getChallenge, saveLevelGifts, saveStreakGift, saveTodayShots, setTotalShots, subscribePendingSubmissions, unlockParent, lockParent, useFirebase } from "./data.js";
 
 const dateKey = new Date().toISOString().slice(0, 10);
 const format = new Intl.NumberFormat("en-US");
@@ -51,6 +51,15 @@ $("#giftForm").addEventListener("submit", async event => {
   catch { message.textContent = "Could not save the gift."; }
   button.disabled = false;
 });
+$("#levelGiftForm").addEventListener("submit", async event => {
+  event.preventDefault();
+  const button = $("#levelGiftButton"), message = $("#levelGiftMessage");
+  const gifts = Object.fromEntries([...document.querySelectorAll("[data-level-gift]")].map(input => [input.dataset.levelGift, input.value.trim()]));
+  button.disabled = true; message.textContent = "Saving…";
+  try { await saveLevelGifts(gifts); message.textContent = "Level gifts saved."; }
+  catch { message.textContent = "Could not save level gifts."; }
+  button.disabled = false;
+});
 function renderPending(items) {
   const list = $("#pendingSubmissions");
   if (!items.length) { list.innerHTML = `<p class="muted">No shots waiting for approval.</p>`; return; }
@@ -69,6 +78,7 @@ async function showEditor() {
   $("#adminTotal").textContent = format.format(challenge.totalShots || 0);
   $("#totalInput").value = challenge.totalShots || 0;
   $("#giftInput").value = challenge.streakGift || "";
+  document.querySelectorAll("[data-level-gift]").forEach(input => input.value = challenge.levelGifts?.[input.dataset.levelGift] || "");
   subscribePendingSubmissions(renderPending, () => $("#approvalMessage").textContent = "Could not load submissions.");
 }
 if (sessionStorage.getItem("soccer-parent-unlocked") === "yes") showEditor();

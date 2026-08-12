@@ -1,15 +1,15 @@
 import { submitGoal, submitShots, subscribeChallenge, subscribeLatestGoal, useFirebase } from "./data.js";
 
 const levels = [
-  { name: "Beginner", target: 10000, image: "beginner" },
-  { name: "Rookie", target: 20000, image: "rookie" },
-  { name: "Academy", target: 30000, image: "academy" },
-  { name: "Striker", target: 40000, image: "striker" },
-  { name: "Playmaker", target: 50000, image: "playmaker" },
-  { name: "Finisher", target: 70000, image: "finisher" },
-  { name: "Sharpshooter", target: 100000, image: "sharpshooter" },
-  { name: "Elite", target: 150000, image: "elite" },
-  { name: "Champion", target: 200000, image: "champion" },
+  { name: "Beginner", target: 5000, image: "beginner" },
+  { name: "Rookie", target: 15000, image: "rookie" },
+  { name: "Academy", target: 25000, image: "academy" },
+  { name: "Playmaker", target: 40000, image: "playmaker" },
+  { name: "Striker", target: 60000, image: "striker" },
+  { name: "Finisher", target: 90000, image: "finisher" },
+  { name: "Sharpshooter", target: 130000, image: "sharpshooter" },
+  { name: "Elite", target: 200000, image: "elite" },
+  { name: "Champion", target: 300000, image: "champion" },
   { name: "Master", target: 500000, image: "master" },
   { name: "Legend", target: 1000000, image: "legend" }
 ];
@@ -53,7 +53,7 @@ function render(data) {
   }));
   document.querySelector("#achievementsHeading").textContent = "NEXT 4 LEVELS";
   document.querySelector("#badges").innerHTML = upcoming.map(next => `<article class="badge next-badge"><span>⚽</span><strong>LEVEL ${next.level}</strong><b>${next.name}</b><small>${format.format(next.goal)} shots</small><em>${format.format(next.remaining)} to go</em></article>`).join("");
-  document.querySelector("#levelGiftBoxes").innerHTML = upcoming.map(next => `<div class="level-gift-box"><span>🎁</span><small>LEVEL ${next.level} REWARD</small></div>`).join("");
+  document.querySelector("#levelGiftBoxes").innerHTML = upcoming.map(next => `<div class="level-gift-box"><span>🎁</span><small>LEVEL ${next.level} · ${next.name}</small><em>${data.levelGifts?.[next.name] || "A surprise from your parent!"}</em></div>`).join("");
 }
 
 subscribeChallenge(render, () => document.querySelector("#connectionStatus").textContent = "Could not connect. Check Firebase setup.");

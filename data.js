@@ -116,6 +116,13 @@ export async function saveStreakGift(text) {
   await setDoc(doc(db, "challenge", "main"), next); return next;
 }
 
+export async function saveLevelGifts(levelGifts) {
+  const current = await getChallenge(); const next = { ...current, levelGifts, updatedAt: new Date().toISOString() };
+  if (!useFirebase) { saveDemo(next); return next; }
+  const { doc, setDoc } = await import("https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js");
+  await setDoc(doc(db, "challenge", "main"), next); return next;
+}
+
 export async function unlockParent(pin) {
   if (!useFirebase) return true;
   if (!parentEmail || parentEmail === "parent@example.com") throw new Error("Add parentEmail to firebase-config.js first.");
