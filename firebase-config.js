@@ -9,8 +9,8 @@ export const firebaseConfig = {
   appId: "1:650305528960:web:2af15387fd86455de8f265",
 };
 
-export const adminPin = "973102";
+export const adminPin = "Deco*0312";
 // This email is not secret. Its password is the numeric PIN entered in admin.html.
 export const parentEmail = "57jordan@naver.com";
 // Set this once to the number already completed before using the app.
-export const startingTotal = 309;
+export const startingTotal = 124060;
