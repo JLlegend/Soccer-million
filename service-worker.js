@@ -1,4 +1,4 @@
-const CACHE = "soccer-million-v10";
+const CACHE = "soccer-million-v11";
 const ASSETS = ["./","./index.html","./admin.html","./styles.css","./backgrounds.css","./features.css","./rewards.css","./app.js","./admin.js","./data.js","./firebase-config.js","./manifest.webmanifest","./icons/icon.svg","./assets/levels/beginner.webp","./assets/levels/rookie.webp","./assets/levels/academy.webp","./assets/levels/striker.webp","./assets/levels/playmaker.webp","./assets/levels/finisher.webp","./assets/levels/sharpshooter.webp","./assets/levels/elite.webp","./assets/levels/champion.webp","./assets/levels/master.webp","./assets/levels/legend.webp"];
 self.addEventListener("install", event => event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(ASSETS))));
 self.addEventListener("fetch", event => event.respondWith(caches.match(event.request).then(cached => cached || fetch(event.request))));

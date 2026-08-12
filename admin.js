@@ -79,6 +79,9 @@ async function showEditor() {
   $("#totalInput").value = challenge.totalShots || 0;
   $("#giftInput").value = challenge.streakGift || "";
   document.querySelectorAll("[data-level-gift]").forEach(input => input.value = challenge.levelGifts?.[input.dataset.levelGift] || "");
-  subscribePendingSubmissions(renderPending, () => $("#approvalMessage").textContent = "Could not load submissions.");
+  subscribePendingSubmissions(renderPending, error => {
+    $("#pendingSubmissions").innerHTML = `<p class="muted">No submissions are visible yet.</p>`;
+    $("#approvalMessage").textContent = error?.code === "permission-denied" ? "Update and publish the Firestore Rules, then refresh this page." : "Could not load submissions. Refresh and try again.";
+  });
 }
 if (sessionStorage.getItem("soccer-parent-unlocked") === "yes") showEditor();
