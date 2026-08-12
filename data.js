@@ -16,6 +16,10 @@ if (useFirebase) {
 
 function demoData() { return JSON.parse(localStorage.getItem(demoKey) || JSON.stringify(defaultData)); }
 function saveDemo(data) { localStorage.setItem(demoKey, JSON.stringify(data)); }
+function demoSubmissions() { return JSON.parse(localStorage.getItem(`${demoKey}-submissions`) || "[]"); }
+function saveDemoSubmissions(items) { localStorage.setItem(`${demoKey}-submissions`, JSON.stringify(items)); }
+function demoGoals() { return JSON.parse(localStorage.getItem(`${demoKey}-goals`) || "[]"); }
+function saveDemoGoals(items) { localStorage.setItem(`${demoKey}-goals`, JSON.stringify(items)); }
 
 export async function getChallenge() {
   if (!useFirebase) return demoData();
@@ -50,6 +54,66 @@ export async function setTotalShots(total) {
   const { doc, setDoc } = await import("https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js");
   await setDoc(doc(db, "challenge", "main"), next);
   return next;
+}
+
+export async function submitShots(shots) {
+  const submission = { shots, dateKey: new Date().toISOString().slice(0, 10), submittedAt: new Date().toISOString(), status: "pending" };
+  if (!useFirebase) { const items = [submission, ...demoSubmissions()]; saveDemoSubmissions(items); return submission; }
+  const { addDoc, collection, serverTimestamp } = await import("https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js");
+  await addDoc(collection(db, "submissions"), { ...submission, submittedAt: serverTimestamp() });
+  return submission;
+}
+
+export function subscribePendingSubmissions(callback, onError) {
+  if (!useFirebase) { callback(demoSubmissions().filter(item => item.status === "pending")); window.addEventListener("storage", () => callback(demoSubmissions().filter(item => item.status === "pending"))); return () => {}; }
+  let stop = () => {};
+  import("https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js").then(({ collection, onSnapshot }) => {
+    stop = onSnapshot(collection(db, "submissions"), snapshot => callback(snapshot.docs.map(item => ({ id: item.id, ...item.data() })).filter(item => item.status === "pending").sort((a, b) => String(b.submittedAt?.toDate?.() || b.submittedAt || "").localeCompare(String(a.submittedAt?.toDate?.() || a.submittedAt || "")))), onError);
+  }).catch(onError);
+  return () => stop();
+}
+
+export async function approveSubmission(submission) {
+  if (!useFirebase) {
+    const current = demoData(); const dailyShots = { ...current.dailyShots, [submission.dateKey]: Number(current.dailyShots?.[submission.dateKey] || 0) + submission.shots };
+    saveDemo({ ...current, dailyShots, totalShots: Number(current.totalShots || 0) + submission.shots, updatedAt: new Date().toISOString() });
+    saveDemoSubmissions(demoSubmissions().map(item => item === submission ? { ...item, status: "approved" } : item)); return;
+  }
+  const { doc, runTransaction, serverTimestamp } = await import("https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js");
+  await runTransaction(db, async transaction => {
+    const challengeRef = doc(db, "challenge", "main"); const submissionRef = doc(db, "submissions", submission.id);
+    const [challengeSnap, submissionSnap] = await Promise.all([transaction.get(challengeRef), transaction.get(submissionRef)]);
+    if (!submissionSnap.exists() || submissionSnap.data().status !== "pending") throw new Error("This submission was already reviewed.");
+    const current = challengeSnap.exists() ? { ...defaultData, ...challengeSnap.data() } : defaultData;
+    const dateKey = submissionSnap.data().dateKey; const shots = Number(submissionSnap.data().shots);
+    const dailyShots = { ...current.dailyShots, [dateKey]: Number(current.dailyShots?.[dateKey] || 0) + shots };
+    transaction.set(challengeRef, { ...current, dailyShots, totalShots: Number(current.totalShots || 0) + shots, updatedAt: serverTimestamp() });
+    transaction.update(submissionRef, { status: "approved", approvedAt: serverTimestamp() });
+  });
+}
+
+export async function submitGoal(text) {
+  const goal = { text, submittedAt: new Date().toISOString() };
+  if (!useFirebase) { saveDemoGoals([goal, ...demoGoals()]); return goal; }
+  const { addDoc, collection, serverTimestamp } = await import("https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js");
+  await addDoc(collection(db, "goals"), { ...goal, submittedAt: serverTimestamp() });
+  return goal;
+}
+
+export function subscribeLatestGoal(callback, onError) {
+  if (!useFirebase) { callback(demoGoals()[0]?.text || ""); window.addEventListener("storage", () => callback(demoGoals()[0]?.text || "")); return () => {}; }
+  let stop = () => {};
+  import("https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js").then(({ collection, limit, onSnapshot, orderBy, query }) => {
+    stop = onSnapshot(query(collection(db, "goals"), orderBy("submittedAt", "desc"), limit(1)), snapshot => callback(snapshot.docs[0]?.data().text || ""), onError);
+  }).catch(onError);
+  return () => stop();
+}
+
+export async function saveStreakGift(text) {
+  const current = await getChallenge(); const next = { ...current, streakGift: text, updatedAt: new Date().toISOString() };
+  if (!useFirebase) { saveDemo(next); return next; }
+  const { doc, setDoc } = await import("https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js");
+  await setDoc(doc(db, "challenge", "main"), next); return next;
 }
 
 export async function unlockParent(pin) {

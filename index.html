@@ -9,6 +9,7 @@
     <link rel="icon" href="icons/icon.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="styles.css" />
     <link rel="stylesheet" href="backgrounds.css" />
+    <link rel="stylesheet" href="features.css" />
     <title>Soccer Million Challenge</title>
   </head>
   <body class="theme-0">
@@ -38,9 +39,30 @@
         <div><strong id="streakDays">0 Day Streak</strong><p>Keep the momentum going.</p></div>
       </section>
 
+      <section class="submit-shots glass-card" aria-labelledby="submitTitle">
+        <p id="submitTitle" class="card-label">TODAY'S PRACTICE</p>
+        <h2>How many shots did you take?</h2>
+        <p>Send it to your parent for approval. Your total changes only after they approve it.</p>
+        <form id="submissionForm"><input id="submissionInput" type="number" min="1" max="100000" step="1" inputmode="numeric" placeholder="e.g. 327" required /><button id="submissionButton">Send for approval</button></form>
+        <p id="submissionMessage" class="form-message" role="status"></p>
+      </section>
+
+      <section class="goal-card glass-card" aria-labelledby="goalTitle">
+        <p id="goalTitle" class="card-label">MY SOCCER DREAM</p>
+        <p id="currentGoal" class="goal-quote">Write the dream you are training for.</p>
+        <form id="goalForm"><textarea id="goalInput" maxlength="180" placeholder="I am going to be a professional soccer player." required></textarea><button id="goalButton">Save my goal</button></form>
+        <p id="goalMessage" class="form-message" role="status"></p>
+      </section>
+
+      <section id="streakGift" class="streak-gift glass-card locked-gift" aria-labelledby="giftTitle">
+        <div class="gift-icon" aria-hidden="true">🎁</div>
+        <div><p id="giftTitle" class="card-label">10-DAY STREAK GIFT</p><h2 id="giftStatus">Keep going — 10 days unlocks this gift!</h2><p id="giftText">Practice today to keep your streak alive.</p></div>
+      </section>
+
       <section class="achievements" aria-labelledby="achievementsHeading">
         <p id="achievementsHeading" class="eyebrow">ACHIEVEMENTS</p>
         <div id="badges" class="badge-row"></div>
+        <div id="levelGiftBoxes" class="level-gift-boxes" aria-label="Level reward boxes"></div>
       </section>
     </main>
     <p id="connectionStatus" class="connection-status">Loading challenge…</p>

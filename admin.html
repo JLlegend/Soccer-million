@@ -7,6 +7,7 @@
     <link rel="manifest" href="manifest.webmanifest" />
     <link rel="icon" href="icons/icon.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="features.css" />
     <title>Parent · Soccer Million Challenge</title>
   </head>
   <body class="admin-page theme-0">
@@ -21,8 +22,22 @@
       </div>
       <div id="editorPanel" hidden>
         <p class="eyebrow">PARENT AREA</p>
-        <h1>Today's shots</h1>
+        <h1>Shot approvals</h1>
         <p class="today-date" id="todayDate"></p>
+        <section class="approval-section" aria-labelledby="approvalTitle">
+          <p id="approvalTitle" class="card-label">PENDING APPROVAL</p>
+          <div id="pendingSubmissions" class="pending-list"><p class="muted">Loading submissions…</p></div>
+          <p id="approvalMessage" class="form-message" role="status"></p>
+        </section>
+        <section class="gift-editor" aria-labelledby="giftEditorTitle">
+          <p id="giftEditorTitle" class="card-label">10-DAY STREAK GIFT</p>
+          <p class="muted">Write the reward message your child sees after a 10-day streak.</p>
+          <form id="giftForm"><textarea id="giftInput" maxlength="180" placeholder="You earned a new soccer ball!"></textarea><button id="giftButton">Save gift</button></form>
+          <p id="giftMessage" class="form-message" role="status"></p>
+        </section>
+        <details class="manual-entry">
+          <summary>Parent manual entry / correction</summary>
+          <p class="muted">Use only when you need to enter a number yourself.</p>
         <form id="shotsForm"><input id="shotsInput" type="number" min="0" max="100000" step="1" inputmode="numeric" placeholder="327" required /><button id="saveButton">Save</button></form>
         <p class="muted">Current total: <strong id="adminTotal">0</strong> shots</p>
         <p id="saveMessage" class="form-message" role="status"></p>
@@ -32,6 +47,7 @@
           <form id="totalForm"><input id="totalInput" type="number" min="0" max="1000000" step="1" inputmode="numeric" placeholder="309" required /><button id="totalButton">Set total</button></form>
           <p id="totalMessage" class="form-message" role="status"></p>
         </section>
+        </details>
         <button id="lockButton" class="text-button">Lock parent area</button>
       </div>
     </main>

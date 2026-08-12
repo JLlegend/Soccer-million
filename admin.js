@@ -1,14 +1,7 @@
 import { adminPin } from "./firebase-config.js";
-import { getChallenge, saveTodayShots, setTotalShots, unlockParent, lockParent, useFirebase } from "./data.js";
+import { approveSubmission, getChallenge, saveStreakGift, saveTodayShots, setTotalShots, subscribePendingSubmissions, unlockParent, lockParent, useFirebase } from "./data.js";
 
-function getLocalDateKey(date = new Date()) {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
-}
-
-const dateKey = getLocalDateKey();
+const dateKey = new Date().toISOString().slice(0, 10);
 const format = new Intl.NumberFormat("en-US");
 const $ = s => document.querySelector(s);
 $("#todayDate").textContent = new Intl.DateTimeFormat("en-US", { weekday: "long", month: "long", day: "numeric" }).format(new Date());
@@ -50,11 +43,32 @@ $("#totalForm").addEventListener("submit", async event => {
   catch { message.textContent = "Could not save the total. Check Firebase setup and rules."; }
   button.disabled = false;
 });
+$("#giftForm").addEventListener("submit", async event => {
+  event.preventDefault();
+  const button = $("#giftButton"), message = $("#giftMessage"), value = $("#giftInput").value.trim();
+  button.disabled = true; message.textContent = "Saving…";
+  try { await saveStreakGift(value); message.textContent = "10-day gift saved."; }
+  catch { message.textContent = "Could not save the gift."; }
+  button.disabled = false;
+});
+function renderPending(items) {
+  const list = $("#pendingSubmissions");
+  if (!items.length) { list.innerHTML = `<p class="muted">No shots waiting for approval.</p>`; return; }
+  list.innerHTML = items.map(item => `<article class="pending-item"><div><strong>${format.format(item.shots)} shots</strong><p>${item.dateKey || "Today"}</p></div><button data-approve="${item.id || item.submittedAt}">Approve</button></article>`).join("");
+  list.querySelectorAll("[data-approve]").forEach(button => button.onclick = async () => {
+    const item = items.find(entry => String(entry.id || entry.submittedAt) === button.dataset.approve); const message = $("#approvalMessage");
+    button.disabled = true; message.textContent = "Approving…";
+    try { await approveSubmission(item); message.textContent = `${format.format(item.shots)} shots approved and added.`; }
+    catch (error) { message.textContent = error?.message || "Could not approve this submission."; button.disabled = false; }
+  });
+}
 async function showEditor() {
   $("#pinPanel").hidden = true; $("#editorPanel").hidden = false;
   const challenge = await getChallenge();
   $("#shotsInput").value = challenge.dailyShots?.[dateKey] || "";
   $("#adminTotal").textContent = format.format(challenge.totalShots || 0);
   $("#totalInput").value = challenge.totalShots || 0;
+  $("#giftInput").value = challenge.streakGift || "";
+  subscribePendingSubmissions(renderPending, () => $("#approvalMessage").textContent = "Could not load submissions.");
 }
 if (sessionStorage.getItem("soccer-parent-unlocked") === "yes") showEditor();
