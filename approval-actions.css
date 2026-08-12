@@ -1,0 +1,1 @@
+.approval-actions{display:flex;gap:8px;align-items:center}.delete-button{background:#ff7d7d!important;color:#3b0707!important}@media(max-width:480px){.approval-actions{flex-direction:column}.pending-item{align-items:center}}

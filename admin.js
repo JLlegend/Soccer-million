@@ -1,5 +1,5 @@
 import { adminPin } from "./firebase-config.js";
-import { approveSubmission, getChallenge, saveLevelGifts, saveStreakGift, saveTodayShots, setTotalShots, subscribePendingSubmissions, unlockParent, lockParent, useFirebase } from "./data.js";
+import { approveSubmission, deleteSubmission, getChallenge, saveLevelGifts, saveStreakGift, saveTodayShots, setTotalShots, subscribePendingSubmissions, unlockParent, lockParent, useFirebase } from "./data.js";
 
 const dateKey = new Date().toISOString().slice(0, 10);
 const format = new Intl.NumberFormat("en-US");
@@ -63,12 +63,18 @@ $("#levelGiftForm").addEventListener("submit", async event => {
 function renderPending(items) {
   const list = $("#pendingSubmissions");
   if (!items.length) { list.innerHTML = `<p class="muted">No shots waiting for approval.</p>`; return; }
-  list.innerHTML = items.map(item => `<article class="pending-item"><div><strong>${format.format(item.shots)} shots</strong><p>${item.dateKey || "Today"}</p></div><button data-approve="${item.id || item.submittedAt}">Approve</button></article>`).join("");
+  list.innerHTML = items.map(item => `<article class="pending-item"><div><strong>${format.format(item.shots)} shots</strong><p>${item.dateKey || "Today"}</p></div><div class="approval-actions"><button data-approve="${item.id || item.submittedAt}">Approve</button><button class="delete-button" data-delete="${item.id || item.submittedAt}">Delete</button></div></article>`).join("");
   list.querySelectorAll("[data-approve]").forEach(button => button.onclick = async () => {
     const item = items.find(entry => String(entry.id || entry.submittedAt) === button.dataset.approve); const message = $("#approvalMessage");
     button.disabled = true; message.textContent = "Approving…";
     try { await approveSubmission(item); message.textContent = `${format.format(item.shots)} shots approved and added.`; }
     catch (error) { message.textContent = error?.message || "Could not approve this submission."; button.disabled = false; }
+  });
+  list.querySelectorAll("[data-delete]").forEach(button => button.onclick = async () => {
+    const item = items.find(entry => String(entry.id || entry.submittedAt) === button.dataset.delete); const message = $("#approvalMessage");
+    button.disabled = true; message.textContent = "Deleting…";
+    try { await deleteSubmission(item); message.textContent = "Request deleted."; }
+    catch (error) { message.textContent = error?.code === "permission-denied" ? "Update and publish the Firestore Rules before deleting." : "Could not delete this request."; button.disabled = false; }
   });
 }
 async function showEditor() {

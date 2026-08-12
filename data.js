@@ -92,6 +92,12 @@ export async function approveSubmission(submission) {
   });
 }
 
+export async function deleteSubmission(submission) {
+  if (!useFirebase) { saveDemoSubmissions(demoSubmissions().filter(item => item !== submission)); return; }
+  const { deleteDoc, doc } = await import("https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js");
+  await deleteDoc(doc(db, "submissions", submission.id));
+}
+
 export async function submitGoal(text) {
   const goal = { text, submittedAt: new Date().toISOString() };
   if (!useFirebase) { saveDemoGoals([goal, ...demoGoals()]); return goal; }
