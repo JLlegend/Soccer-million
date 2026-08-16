@@ -55,6 +55,17 @@
           </form>
           <p id="levelGiftMessage" class="form-message" role="status"></p>
         </section>
+        <section class="highlight-editor" aria-labelledby="highlightEditorTitle">
+          <p id="highlightEditorTitle" class="card-label">VIDEO HIGHLIGHTS</p>
+          <p class="muted">Upload a short MP4 video for your child. Maximum file size: 100 MB.</p>
+          <form id="highlightForm" class="highlight-form">
+            <input id="highlightTitle" maxlength="80" placeholder="Title, e.g. Left-foot practice" aria-label="Video title" />
+            <input id="highlightFile" type="file" accept="video/mp4,video/quicktime,video/webm" aria-label="Choose video file" required />
+            <button id="highlightButton">Upload video</button>
+          </form>
+          <p id="highlightMessage" class="form-message" role="status"></p>
+          <div id="adminHighlightList" class="admin-highlight-list"><p class="muted">Loading videos…</p></div>
+        </section>
         <details class="manual-entry">
           <summary>Parent manual entry / correction</summary>
           <p class="muted">Use only when you need to enter a number yourself.</p>

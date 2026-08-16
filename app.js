@@ -1,4 +1,4 @@
-import { submitGoal, submitShots, subscribeChallenge, subscribeLatestGoal, useFirebase } from "./data.js";
+import { submitGoal, submitShots, subscribeChallenge, subscribeHighlights, subscribeLatestGoal, useFirebase } from "./data.js";
 
 const levels = [
   { name: "Beginner", start: 0, target: 5000, image: "beginner" },
@@ -59,6 +59,16 @@ subscribeChallenge(render, () => document.querySelector("#connectionStatus").tex
 subscribeLatestGoal(goal => {
   document.querySelector("#currentGoal").textContent = goal ? `“${goal}”` : "Write the dream you are training for.";
 }, () => {});
+subscribeHighlights(highlights => {
+  const list = document.querySelector("#highlightList");
+  if (!highlights.length) { list.innerHTML = `<p class="muted">Your soccer videos will appear here.</p>`; return; }
+  list.replaceChildren(...highlights.map(highlight => {
+    const card = document.createElement("article"); card.className = "highlight-card";
+    const video = document.createElement("video"); video.controls = true; video.playsInline = true; video.preload = "metadata"; video.src = highlight.downloadURL;
+    const title = document.createElement("p"); title.textContent = highlight.title || "Soccer highlight";
+    card.append(video, title); return card;
+  }));
+}, () => { document.querySelector("#highlightList").innerHTML = `<p class="muted">Videos are not available yet.</p>`; });
 document.querySelector("#submissionForm").addEventListener("submit", async event => {
   event.preventDefault();
   const value = Number(document.querySelector("#submissionInput").value);

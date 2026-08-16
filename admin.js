@@ -1,5 +1,5 @@
 import { adminPin } from "./firebase-config.js";
-import { approveSubmission, deleteSubmission, getChallenge, saveLevelGifts, saveStreakGift, saveTodayShots, setTotalShots, subscribePendingSubmissions, unlockParent, lockParent, useFirebase } from "./data.js";
+import { approveSubmission, deleteHighlight, deleteSubmission, getChallenge, saveLevelGifts, saveStreakGift, saveTodayShots, setTotalShots, subscribeHighlights, subscribePendingSubmissions, unlockParent, lockParent, uploadHighlight, useFirebase } from "./data.js";
 
 const dateKey = new Date().toISOString().slice(0, 10);
 const format = new Intl.NumberFormat("en-US");
@@ -60,6 +60,16 @@ $("#levelGiftForm").addEventListener("submit", async event => {
   catch { message.textContent = "Could not save level gifts."; }
   button.disabled = false;
 });
+$("#highlightForm").addEventListener("submit", async event => {
+  event.preventDefault();
+  const button = $("#highlightButton"), message = $("#highlightMessage"), file = $("#highlightFile").files[0];
+  button.disabled = true; message.textContent = "Uploading… 0%";
+  try {
+    await uploadHighlight(file, $("#highlightTitle").value, percent => message.textContent = `Uploading… ${percent}%`);
+    $("#highlightForm").reset(); message.textContent = "Video uploaded. Your child can watch it now.";
+  } catch (error) { message.textContent = error?.message || "Could not upload the video. Check Storage setup and rules."; }
+  button.disabled = false;
+});
 function renderPending(items) {
   const list = $("#pendingSubmissions");
   if (!items.length) { list.innerHTML = `<p class="muted">No shots waiting for approval.</p>`; return; }
@@ -77,6 +87,17 @@ function renderPending(items) {
     catch (error) { message.textContent = error?.code === "permission-denied" ? "Update and publish the Firestore Rules before deleting." : "Could not delete this request."; button.disabled = false; }
   });
 }
+function renderHighlights(items) {
+  const list = $("#adminHighlightList");
+  if (!items.length) { list.innerHTML = `<p class="muted">No videos uploaded yet.</p>`; return; }
+  list.replaceChildren(...items.map(item => {
+    const card = document.createElement("article"); card.className = "admin-highlight-item";
+    const copy = document.createElement("div"); const title = document.createElement("strong"); title.textContent = item.title || "Soccer highlight"; copy.append(title);
+    const button = document.createElement("button"); button.className = "delete-button"; button.textContent = "Delete";
+    button.onclick = async () => { if (!confirm(`Delete “${title.textContent}”?`)) return; button.disabled = true; $("#highlightMessage").textContent = "Deleting…"; try { await deleteHighlight(item); $("#highlightMessage").textContent = "Video deleted."; } catch { $("#highlightMessage").textContent = "Could not delete the video. Check Storage Rules."; button.disabled = false; } };
+    card.append(copy, button); return card;
+  }));
+}
 async function showEditor() {
   $("#pinPanel").hidden = true; $("#editorPanel").hidden = false;
   const challenge = await getChallenge();
@@ -89,5 +110,6 @@ async function showEditor() {
     $("#pendingSubmissions").innerHTML = `<p class="muted">No submissions are visible yet.</p>`;
     $("#approvalMessage").textContent = error?.code === "permission-denied" ? "Update and publish the Firestore Rules, then refresh this page." : "Could not load submissions. Refresh and try again.";
   });
+  subscribeHighlights(renderHighlights, () => { $("#adminHighlightList").innerHTML = `<p class="muted">Could not load videos. Check the Firestore Rules.</p>`; });
 }
 if (sessionStorage.getItem("soccer-parent-unlocked") === "yes") showEditor();

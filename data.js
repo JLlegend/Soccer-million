@@ -4,14 +4,16 @@ const useFirebase = firebaseConfig.apiKey !== "REPLACE_ME";
 const demoKey = "soccer-million-challenge-demo";
 const defaultData = { totalShots: Number(startingTotal || 0), dailyShots: {}, updatedAt: null };
 
-let db, auth;
+let db, auth, storage;
 if (useFirebase) {
   const { initializeApp } = await import("https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js");
   const { getFirestore } = await import("https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js");
   const { getAuth } = await import("https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js");
+  const { getStorage } = await import("https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js");
   const app = initializeApp(firebaseConfig);
   db = getFirestore(app);
   auth = getAuth(app);
+  storage = getStorage(app);
 }
 
 function demoData() { return JSON.parse(localStorage.getItem(demoKey) || JSON.stringify(defaultData)); }
@@ -127,6 +129,43 @@ export async function saveLevelGifts(levelGifts) {
   if (!useFirebase) { saveDemo(next); return next; }
   const { doc, setDoc } = await import("https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js");
   await setDoc(doc(db, "challenge", "main"), next); return next;
+}
+
+export function subscribeHighlights(callback, onError) {
+  if (!useFirebase) { callback([]); return () => {}; }
+  let stop = () => {};
+  import("https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js").then(({ collection, limit, onSnapshot, orderBy, query }) => {
+    stop = onSnapshot(query(collection(db, "highlights"), orderBy("createdAt", "desc"), limit(24)), snapshot => callback(snapshot.docs.map(item => ({ id: item.id, ...item.data() }))), onError);
+  }).catch(onError);
+  return () => stop();
+}
+
+export async function uploadHighlight(file, title, onProgress = () => {}) {
+  if (!useFirebase) throw new Error("Firebase Storage is required for video uploads.");
+  if (!auth.currentUser) throw new Error("Unlock the parent area before uploading.");
+  if (!file || !file.type.startsWith("video/")) throw new Error("Choose a video file.");
+  if (file.size > 100 * 1024 * 1024) throw new Error("Please choose a video smaller than 100 MB.");
+  const { ref, uploadBytesResumable, getDownloadURL, deleteObject } = await import("https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js");
+  const { addDoc, collection, serverTimestamp } = await import("https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js");
+  const extension = (file.name.split(".").pop() || "mp4").replace(/[^a-z0-9]/gi, "").toLowerCase() || "mp4";
+  const storagePath = `highlights/${crypto.randomUUID()}.${extension}`;
+  const fileRef = ref(storage, storagePath);
+  await new Promise((resolve, reject) => {
+    const task = uploadBytesResumable(fileRef, file, { contentType: file.type });
+    task.on("state_changed", snapshot => onProgress(Math.round(snapshot.bytesTransferred / snapshot.totalBytes * 100)), reject, resolve);
+  });
+  try {
+    const downloadURL = await getDownloadURL(fileRef);
+    await addDoc(collection(db, "highlights"), { title: String(title || "Soccer highlight").trim().slice(0, 80) || "Soccer highlight", downloadURL, storagePath, createdAt: serverTimestamp() });
+  } catch (error) { await deleteObject(fileRef).catch(() => {}); throw error; }
+}
+
+export async function deleteHighlight(highlight) {
+  if (!useFirebase) return;
+  const { ref, deleteObject } = await import("https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js");
+  const { deleteDoc, doc } = await import("https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js");
+  if (highlight.storagePath) await deleteObject(ref(storage, highlight.storagePath)).catch(error => { if (error?.code !== "storage/object-not-found") throw error; });
+  await deleteDoc(doc(db, "highlights", highlight.id));
 }
 
 export async function unlockParent(pin) {
