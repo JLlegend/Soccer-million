@@ -38,12 +38,25 @@ function render(data) {
   document.querySelector("#progressBar").style.width = `${Math.min(100, Math.max(0, (total - priorTarget) / (level.target - priorTarget) * 100))}%`;
   const days = streak(data.dailyShots);
   document.querySelector("#streakDays").textContent = `${days} Day${days === 1 ? "" : "s"} Streak`;
-  const giftUnlocked = days >= 10;
+  const firstGiftDay = 10;
+  const nextStreakGoal = 30;
+  const giftUnlocked = days >= firstGiftDay;
   const gift = data.streakGift || "A special surprise from your parent!";
   document.querySelector("#streakGift").classList.toggle("locked-gift", !giftUnlocked);
   document.querySelector("#streakGift").classList.toggle("unlocked-gift", giftUnlocked);
-  document.querySelector("#giftStatus").textContent = giftUnlocked ? "You unlocked a gift!" : `${Math.max(0, 10 - days)} more day${10 - days === 1 ? "" : "s"} to unlock a gift.`;
-  document.querySelector("#giftText").textContent = giftUnlocked ? gift : "Practice today to keep your streak alive.";
+  if (days < firstGiftDay) {
+    document.querySelector("#giftTitle").textContent = "10-DAY STREAK GIFT";
+    document.querySelector("#giftStatus").textContent = `${firstGiftDay - days} more day${firstGiftDay - days === 1 ? "" : "s"} to unlock a gift.`;
+    document.querySelector("#giftText").textContent = "Practice today to keep your streak alive.";
+  } else if (days < nextStreakGoal) {
+    document.querySelector("#giftTitle").textContent = "10-DAY STREAK UNLOCKED";
+    document.querySelector("#giftStatus").textContent = "You unlocked a gift!";
+    document.querySelector("#giftText").textContent = `${gift} Next goal: 30-Day Streak — ${nextStreakGoal - days} days to go.`;
+  } else {
+    document.querySelector("#giftTitle").textContent = "30-DAY STREAK ACHIEVED";
+    document.querySelector("#giftStatus").textContent = "Incredible — 30 Days Strong!";
+    document.querySelector("#giftText").textContent = "You kept your training streak alive for 30 days. Keep building your legend!";
+  }
   const upcoming = levels.slice(levelIndex + 1, levelIndex + 5).map((next, offset) => ({
     name: next.name,
     level: levelIndex + offset + 2,
